@@ -41,6 +41,10 @@ dependencies {
 	// test
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 
+	// JUnit
+	testImplementation 'org.junit.jupiter:junit-jupiter'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+
 	// h2 database
 	runtimeOnly 'com.h2database:h2'
 }
