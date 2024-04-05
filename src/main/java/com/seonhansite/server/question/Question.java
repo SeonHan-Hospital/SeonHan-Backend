@@ -5,6 +5,7 @@ import com.seonhansite.server.answer.Answer;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
@@ -28,8 +29,9 @@ public class Question extends BaseEntity {
 
     private String password;
 
+    @Builder.Default
     @OneToMany(mappedBy = "question", cascade = CascadeType.REMOVE)
-    private List<Answer> answerList;
+    private List<Answer> answerList = new ArrayList<>();
 
     public void updateSubject(String subject) {
         this.subject = subject;
