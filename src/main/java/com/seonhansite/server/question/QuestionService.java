@@ -2,6 +2,7 @@ package com.seonhansite.server.question;
 
 
 import com.seonhansite.server.exception.DataNotFoundException;
+import com.seonhansite.server.exception.QuestionNotFoundException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -68,9 +69,10 @@ public class QuestionService {
     @Transactional
     public Integer deleteQuestion(Long id) {
         try {
-            this.questionRepository.deleteById(id);
+            Question q = this.questionRepository.findById(id).orElseThrow(QuestionNotFoundException::new);
+            this.questionRepository.delete(q);
             return 1;
-        } catch (RuntimeException e) {
+        } catch (QuestionNotFoundException e) {
             return 0;
         }
     }
