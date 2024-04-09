@@ -18,15 +18,16 @@ public class QuestionApi {
     private final QuestionService questionService;
 
     @GetMapping
-    public ResponseEntity<List<QuestionResponse>> questionList(
+    public ResponseEntity<QuestionListResponse> questionList(
             @RequestParam(value = "author", required = false) String author,
             @RequestParam(value = "subject", required = false) String subject,
             @RequestParam(value = "content", required = false) String content,
             @RequestParam(value = "page", required = false) Integer page,
             @RequestParam(value = "limit", required = false) Integer limit) {
 
-        List<QuestionResponse> questionList = this.questionService.getList();
-        return ResponseEntity.ok().body(questionList);
+        QuestionListResponse response = this.questionService.getList(author, subject, content, page, limit);
+
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/{id}")
@@ -50,7 +51,7 @@ public class QuestionApi {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteQuestion(@PathVariable("id") Long id) throws UnsupportedEncodingException {
         Integer res = this.questionService.deleteQuestion(id);
-        return res == 1 ? new ResponseEntity<>(new String("질문 삭제 성공".getBytes(), "utf-8"), HttpStatus.OK) :
+        return res == 1 ? new ResponseEntity<>(new String("질문 삭제 성공".getBytes(), "utf-8"), HttpStatus.NO_CONTENT) :
                 new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }
