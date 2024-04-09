@@ -4,6 +4,8 @@ package com.seonhansite.server.repository;
 import com.seonhansite.server.answer.Answer;
 import com.seonhansite.server.exception.AnswerNotFoundException;
 import com.seonhansite.server.answer.AnswerRepository;
+import com.seonhansite.server.question.Question;
+import com.seonhansite.server.question.QuestionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.DisplayName;
@@ -11,14 +13,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
 
 @DataJpaTest
 public class AnswerRepositoryTest {
 
     @Autowired
     private AnswerRepository answerRepository;
+
+    @Autowired
+    private QuestionRepository questionRepository;
 
     @PersistenceContext
     private EntityManager em;
@@ -43,7 +51,7 @@ public class AnswerRepositoryTest {
     }
 
     @Test
-    void questionDateTest() {
+    void answerDateTest() {
         Answer a = createAnswers();
 
         this.answerRepository.save(a);
@@ -70,17 +78,51 @@ public class AnswerRepositoryTest {
         assertThat(updatedAnswer.getContent()).isEqualTo(updatedContent);
     }
 
+    @Test
+    void findAllByQuestionIdTest() {
+        Question q = createQuestions();
+        Answer a = createAnswer("test", "test content", q);
+        Answer b = createAnswer("test2", "test content2", q);
 
-    private Answer createAnswer(String author, String content) {
+        this.questionRepository.save(q);
+        clear();
+        this.answerRepository.save(a);
+        clear();
+        this.answerRepository.save(b);
+        clear();
+
+        List<Answer> savedAnswer = this.answerRepository.findAllByQuestionId(q.getId());
+
+        assertThat(savedAnswer.size()).isEqualTo(2);
+        assertThat(savedAnswer.get(0).getId()).isEqualTo(a.getId());
+        assertThat(savedAnswer.get(0).getAuthor()).isEqualTo(a.getAuthor());
+        assertThat(savedAnswer.get(0).getContent()).isEqualTo(a.getContent());
+        assertThat(savedAnswer.get(1).getId()).isEqualTo(b.getId());
+        assertThat(savedAnswer.get(1).getAuthor()).isEqualTo(b.getAuthor());
+        assertThat(savedAnswer.get(1).getContent()).isEqualTo(b.getContent());
+
+    }
+
+    private Answer createAnswer(String author, String content, Question q) {
         return Answer.builder()
                 .author(author)
                 .content(content)
+                .question(q)
                 .build();
     }
 
     private Answer createAnswers() {
         return Answer.builder()
                 .author("jaeookk")
+                .content("내용 입니다.")
+                .build();
+    }
+
+    private Question createQuestions() {
+        return Question.builder()
+                .author("jaeookk")
+                .password("qwer1234")
+                .subject("제목 입니다.")
                 .content("내용 입니다.")
                 .build();
     }
