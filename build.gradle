@@ -55,3 +55,8 @@ dependencies {
 tasks.named('test') {
 	useJUnitPlatform()
 }
+
+bootJar {
+	archivesBaseName = 'seonhan'
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+}

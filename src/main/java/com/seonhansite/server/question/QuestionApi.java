@@ -13,6 +13,7 @@ import java.util.List;
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("/question")
+@CrossOrigin(origins = "*")
 public class QuestionApi {
 
     private final QuestionService questionService;
