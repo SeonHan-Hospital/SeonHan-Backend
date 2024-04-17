@@ -1,5 +1,7 @@
 package com.seonhansite.server.question;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,4 +14,7 @@ public interface QuestionRepository extends JpaRepository<Question, Long> {
     Optional<Question> findByAuthor(String author);
     List<Question> findBySubjectLike(String subject);
     List<Question> findByAuthorLike(String author);
+
+    @Override
+    Page<Question> findAll(Pageable pageable);
 }

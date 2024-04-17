@@ -7,9 +7,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -25,19 +30,37 @@ public class QuestionService {
     @PersistenceContext
     private final EntityManager em;
 
+//    @Transactional
+//    public QuestionListResponse getList(String author, String subject, String content, Integer page, Integer limit) {
+//        // TODO : Implement filtering, pagination
+//
+//        List<QuestionResponse> ql = this.questionRepository.findAll().stream().map(QuestionResponse::new).sorted(Comparator.comparing(QuestionResponse::getCreatedAt).reversed()).toList();
+//
+//        int count = ql.size();
+//        int pageNumber = (page != null) ? page : 1;
+//
+//        QuestionListResponse response = new QuestionListResponse();
+//        response.setRows(ql);
+//        response.setCount(count);
+//        response.setPage(pageNumber);
+//        return response;
+//    }
+
     @Transactional
     public QuestionListResponse getList(String author, String subject, String content, Integer page, Integer limit) {
-        // TODO : Implement filtering, pagination
+        List<Sort.Order> sorts = new ArrayList<>();
+        sorts.add(Sort.Order.desc("createdAt"));
+        Pageable pageable = PageRequest.of(page, limit, Sort.by(sorts));
+        Page<QuestionResponse> pq = this.questionRepository.findAll(pageable).map(QuestionResponse::new);
 
-        List<QuestionResponse> ql = this.questionRepository.findAll().stream().map(QuestionResponse::new).sorted(Comparator.comparing(QuestionResponse::getCreatedAt).reversed()).toList();
+        Integer count = Math.toIntExact(pq.getTotalElements());
 
-        int count = ql.size();
-        int pageNumber = (page != null) ? page : 1;
 
         QuestionListResponse response = new QuestionListResponse();
-        response.setRows(ql);
+        response.setRows(pq.getContent());
         response.setCount(count);
-        response.setPage(pageNumber);
+        response.setPage(page);
+        response.setMessage("QnA 목록을 받아왔습니다.");
         return response;
     }
 

@@ -2,6 +2,7 @@ package com.seonhansite.server.question;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -23,13 +24,14 @@ public class QuestionApi {
             @RequestParam(value = "author", required = false) String author,
             @RequestParam(value = "subject", required = false) String subject,
             @RequestParam(value = "content", required = false) String content,
-            @RequestParam(value = "page", required = false) Integer page,
-            @RequestParam(value = "limit", required = false) Integer limit) {
+            @RequestParam(value = "page", defaultValue = "0") Integer page,
+            @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
 
         QuestionListResponse response = this.questionService.getList(author, subject, content, page, limit);
 
         return ResponseEntity.ok().body(response);
     }
+
 
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponse> questionDetail(@PathVariable("id") Long id) {
