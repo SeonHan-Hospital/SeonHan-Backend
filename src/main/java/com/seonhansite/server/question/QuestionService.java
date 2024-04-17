@@ -11,11 +11,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,28 +30,19 @@ public class QuestionService {
     @PersistenceContext
     private final EntityManager em;
 
-//    @Transactional
-//    public QuestionListResponse getList(String author, String subject, String content, Integer page, Integer limit) {
-//        // TODO : Implement filtering, pagination
-//
-//        List<QuestionResponse> ql = this.questionRepository.findAll().stream().map(QuestionResponse::new).sorted(Comparator.comparing(QuestionResponse::getCreatedAt).reversed()).toList();
-//
-//        int count = ql.size();
-//        int pageNumber = (page != null) ? page : 1;
-//
-//        QuestionListResponse response = new QuestionListResponse();
-//        response.setRows(ql);
-//        response.setCount(count);
-//        response.setPage(pageNumber);
-//        return response;
-//    }
-
     @Transactional
     public QuestionListResponse getList(String author, String subject, String content, Integer page, Integer limit) {
         List<Sort.Order> sorts = new ArrayList<>();
         sorts.add(Sort.Order.desc("createdAt"));
         Pageable pageable = PageRequest.of(page, limit, Sort.by(sorts));
-        Page<QuestionResponse> pq = this.questionRepository.findAll(pageable).map(QuestionResponse::new);
+
+        Specification<Question> spec = Specification.where(
+                QuestionSpecifications.hasAuthor(author)
+                        .and(QuestionSpecifications.hasSubject(subject))
+                        .and(QuestionSpecifications.hasContent(content))
+        );
+
+        Page<QuestionResponse> pq = this.questionRepository.findAll(spec, pageable).map(QuestionResponse::new);
 
         Integer count = Math.toIntExact(pq.getTotalElements());
 
@@ -110,4 +101,22 @@ public class QuestionService {
             return 0;
         }
     }
+
+    private static class QuestionSpecifications {
+        public static Specification<Question> hasAuthor(String author) {
+            return (root, query, criteriaBuilder) ->
+                    author != null && !author.isEmpty() ? criteriaBuilder.like(root.get("author"), "%" + author + "%") : null;
+        }
+
+        public static Specification<Question> hasSubject(String subject) {
+            return (root, query, criteriaBuilder) ->
+                    subject != null && !subject.isEmpty() ? criteriaBuilder.like(root.get("subject"), "%" + subject + "%") : null;
+        }
+
+        public static Specification<Question> hasContent(String content) {
+            return (root, query, criteriaBuilder) ->
+                    content != null && !content.isEmpty() ? criteriaBuilder.like(root.get("content"), "%" + content + "%") : null;
+        }
+    }
+
 }

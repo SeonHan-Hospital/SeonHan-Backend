@@ -21,9 +21,9 @@ public class QuestionApi {
 
     @GetMapping
     public ResponseEntity<QuestionListResponse> questionList(
-            @RequestParam(value = "author", required = false) String author,
-            @RequestParam(value = "subject", required = false) String subject,
-            @RequestParam(value = "content", required = false) String content,
+            @RequestParam(value = "author", defaultValue = "") String author,
+            @RequestParam(value = "subject", defaultValue = "") String subject,
+            @RequestParam(value = "content", defaultValue = "") String content,
             @RequestParam(value = "page", defaultValue = "0") Integer page,
             @RequestParam(value = "limit", defaultValue = "10") Integer limit) {
 
