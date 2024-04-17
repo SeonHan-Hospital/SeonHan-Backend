@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,7 +29,7 @@ public class QuestionService {
     public QuestionListResponse getList(String author, String subject, String content, Integer page, Integer limit) {
         // TODO : Implement filtering, pagination
 
-        List<QuestionResponse> ql = this.questionRepository.findAll().stream().map(QuestionResponse::new).toList();
+        List<QuestionResponse> ql = this.questionRepository.findAll().stream().map(QuestionResponse::new).sorted(Comparator.comparing(QuestionResponse::getCreatedAt).reversed()).toList();
 
         int count = ql.size();
         int pageNumber = (page != null) ? page : 1;

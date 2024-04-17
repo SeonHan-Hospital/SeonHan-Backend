@@ -5,6 +5,7 @@ import com.seonhansite.server.exception.AnswerNotFoundException;
 import com.seonhansite.server.exception.DataNotFoundException;
 import com.seonhansite.server.question.Question;
 import com.seonhansite.server.question.QuestionRepository;
+import com.seonhansite.server.question.QuestionResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,7 +40,7 @@ public class AnswerService {
 
     @Transactional
     public AnswerListResponse getList(Long id, Integer page, Integer limit) {
-        List<AnswerResponse> al = this.answerRepository.findAllByQuestionId(id).stream().map(AnswerResponse::new).toList();
+        List<AnswerResponse> al = this.answerRepository.findAllByQuestionId(id).stream().map(AnswerResponse::new).sorted(Comparator.comparing(AnswerResponse::getCreatedAt).reversed()).toList();
 
         int count = al.size();
         int pageNumber = (page != null) ? page : 1;
