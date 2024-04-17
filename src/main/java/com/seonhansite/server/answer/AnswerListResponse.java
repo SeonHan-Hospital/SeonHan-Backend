@@ -11,5 +11,4 @@ public class AnswerListResponse {
     private List<AnswerResponse> data;
     private String message;
     private Integer count;
-    private Integer page;
 }

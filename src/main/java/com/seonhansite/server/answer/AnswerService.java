@@ -5,7 +5,6 @@ import com.seonhansite.server.exception.AnswerNotFoundException;
 import com.seonhansite.server.exception.DataNotFoundException;
 import com.seonhansite.server.question.Question;
 import com.seonhansite.server.question.QuestionRepository;
-import com.seonhansite.server.question.QuestionResponse;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -39,16 +38,15 @@ public class AnswerService {
     }
 
     @Transactional
-    public AnswerListResponse getList(Long id, Integer page, Integer limit) {
+    public AnswerListResponse getList(Long id) {
         List<AnswerResponse> al = this.answerRepository.findAllByQuestionId(id).stream().map(AnswerResponse::new).sorted(Comparator.comparing(AnswerResponse::getCreatedAt).reversed()).toList();
 
         int count = al.size();
-        int pageNumber = (page != null) ? page : 1;
 
         AnswerListResponse response = new AnswerListResponse();
         response.setData(al);
         response.setCount(count);
-        response.setPage(pageNumber);
+        response.setMessage("답변 목록을 받아왔습니다.");
 
         return response;
     }

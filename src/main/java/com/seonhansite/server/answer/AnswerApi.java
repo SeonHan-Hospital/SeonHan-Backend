@@ -33,12 +33,9 @@ public class AnswerApi {
     }
 
     @GetMapping
-    public ResponseEntity<AnswerListResponse> answerList(
-            @RequestParam(value = "questionId") Long questionId,
-            @RequestParam(value = "page") Integer page,
-            @RequestParam(value = "limit") Integer limit) {
+    public ResponseEntity<AnswerListResponse> answerList(@RequestParam(value = "questionId") Long questionId) {
 
-        AnswerListResponse response = this.answerService.getList(questionId, page, limit);
+        AnswerListResponse response = this.answerService.getList(questionId);
 
         return ResponseEntity.ok().body(response);
     }
