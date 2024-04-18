@@ -9,7 +9,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
-import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
@@ -50,6 +49,6 @@ public class AnswerApi {
     public ResponseEntity<String> deleteAnswer(@PathVariable("id") Long id) throws UnsupportedEncodingException {
         Integer res = this.answerService.deleteAnswer(id);
         return res == 1 ? new ResponseEntity<>(new String("답변 삭제 성공".getBytes(), "utf-8"), HttpStatus.NO_CONTENT) :
-                new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+                new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

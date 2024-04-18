@@ -33,12 +33,15 @@ public class AnswerService {
         if (answer.isPresent()) {
             return new AnswerResponse(answer.get());
         } else {
-            throw new DataNotFoundException("answer not found");
+            throw new DataNotFoundException("answer not found with id: "+ id);
         }
     }
 
     @Transactional
     public AnswerListResponse getList(Long id) {
+        Question question = this.questionRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("Question not found with id: " + id));
+
         List<AnswerResponse> al = this.answerRepository.findAllByQuestionId(id).stream().map(AnswerResponse::new).sorted(Comparator.comparing(AnswerResponse::getCreatedAt).reversed()).toList();
 
         int count = al.size();
@@ -85,6 +88,9 @@ public class AnswerService {
     public Integer deleteAnswer(Long id) {
         try {
             Answer answer = this.answerRepository.findById(id).orElseThrow(AnswerNotFoundException::new);
+            if (answer.getIsDeleted() != null) {
+                throw new AnswerNotFoundException();
+            }
             this.answerRepository.delete(answer);
             return 1;
         } catch (AnswerNotFoundException e) {

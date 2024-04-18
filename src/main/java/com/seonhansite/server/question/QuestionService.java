@@ -1,6 +1,7 @@
 package com.seonhansite.server.question;
 
 
+import com.seonhansite.server.answer.Answer;
 import com.seonhansite.server.exception.DataNotFoundException;
 import com.seonhansite.server.exception.QuestionNotFoundException;
 import jakarta.persistence.EntityManager;
@@ -95,7 +96,14 @@ public class QuestionService {
     public Integer deleteQuestion(Long id) {
         try {
             Question q = this.questionRepository.findById(id).orElseThrow(QuestionNotFoundException::new);
+            if (q.getIsDeleted() != null) {
+                throw new QuestionNotFoundException();
+            }
             this.questionRepository.delete(q);
+            List<Answer> answers = q.getAnswerList();
+            for (Answer answer : answers) {
+                answer.updateIsDeleted();
+            }
             return 1;
         } catch (QuestionNotFoundException e) {
             return 0;
