@@ -13,8 +13,11 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,6 +30,9 @@ public class QuestionService {
 
     @Autowired
     private final QuestionRepository questionRepository;
+
+    @Autowired
+    private final PasswordEncoder passwordEncoder;
 
     @PersistenceContext
     private final EntityManager em;
@@ -107,6 +113,16 @@ public class QuestionService {
             return 1;
         } catch (QuestionNotFoundException e) {
             return 0;
+        }
+    }
+
+    @Transactional
+    public void checkQuestionPassword(Long id, String password) {
+        Question question = this.questionRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("question not found"));
+
+        if (!passwordEncoder.matches(password, question.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
         }
     }
 

@@ -8,6 +8,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
+import java.util.Map;
 
 @Controller
 @RequiredArgsConstructor
@@ -54,5 +55,12 @@ public class QuestionApi {
         Integer res = this.questionService.deleteQuestion(id);
         return res == 1 ? new ResponseEntity<>(new String("질문 삭제 성공".getBytes(), "utf-8"), HttpStatus.NO_CONTENT) :
                 new ResponseEntity<>(HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping("/{id}")
+    public ResponseEntity<Void> questionDetailByPassword(@PathVariable("id") Long id, @RequestBody Map<String, String> requestBody) {
+        String password = requestBody.get("password");
+        questionService.checkQuestionPassword(id, password);
+        return ResponseEntity.noContent().build();
     }
 }
