@@ -76,7 +76,7 @@ public class QuestionService {
     public QuestionResponse createQuestion(QuestionCreateRequest request) {
         Question q = Question.builder()
                 .author(request.getAuthor())
-                .password(request.getPassword())
+                .password(passwordEncoder.encode(request.getPassword()))
                 .subject(request.getSubject())
                 .content(request.getContent())
                 .build();
