@@ -6,8 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.Map;
 
 @Controller
@@ -35,18 +37,27 @@ public class QuestionApi {
     @GetMapping("/{id}")
     public ResponseEntity<QuestionResponse> questionDetail(@PathVariable("id") Long id) {
         QuestionResponse questionResponse = this.questionService.getQuestion(id);
+        questionResponse.setMessage("QnA 상세목록을 받아왔습니다.");
         return ResponseEntity.ok().body(questionResponse);
     }
 
     @PostMapping
     public ResponseEntity<QuestionResponse> createQuestion(@Valid @RequestBody QuestionCreateRequest request) {
         QuestionResponse questionResponse = this.questionService.createQuestion(request);
-        return ResponseEntity.ok().body(questionResponse);
+        questionResponse.setMessage("QnA 작성이 완료되었습니다.");
+
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(questionResponse.getId())
+                .toUri();
+
+        return ResponseEntity.created(location).body(questionResponse);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<QuestionResponse> updateQuestion(@PathVariable("id") Long id, @Valid @RequestBody QuestionUpdateRequest request) {
         QuestionResponse questionResponse = this.questionService.updateQuestion(id, request);
+        questionResponse.setMessage("QnA 수정이 완료되었습니다.");
         return ResponseEntity.ok().body(questionResponse);
     }
 

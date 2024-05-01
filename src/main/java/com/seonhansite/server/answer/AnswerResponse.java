@@ -13,6 +13,7 @@ public class AnswerResponse {
     private String author;
     private String content;
     private Long questionId;
+    private String message;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 

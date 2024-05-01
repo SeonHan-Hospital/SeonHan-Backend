@@ -16,6 +16,7 @@ public class QuestionResponse {
     private String subject;
     private String content;
     private List<Long> answerId = new ArrayList<>();
+    private String message;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
