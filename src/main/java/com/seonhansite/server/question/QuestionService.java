@@ -2,8 +2,7 @@ package com.seonhansite.server.question;
 
 
 import com.seonhansite.server.answer.Answer;
-import com.seonhansite.server.exception.DataNotFoundException;
-import com.seonhansite.server.exception.QuestionNotFoundException;
+import com.seonhansite.server.exception.RestApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
@@ -13,15 +12,18 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
+import static com.seonhansite.server.type.SeonhanExceptionReasonType.*;
+import static com.seonhansite.server.type.SeonhanMethodType.*;
+import static com.seonhansite.server.type.SeonhanResourceType.QUESTION;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 
 @RequiredArgsConstructor
@@ -64,12 +66,9 @@ public class QuestionService {
 
     @Transactional
     public QuestionResponse getQuestion(Long id) {
-        Optional<Question> question = this.questionRepository.findById(id);
-        if (question.isPresent()) {
-            return new QuestionResponse(question.get());
-        } else {
-            throw new DataNotFoundException("question not found");
-        }
+        Question question = this.questionRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, QUESTION, NOT_FOUND_QUESTION, id));
+        return new QuestionResponse(question);
     }
 
     @Transactional
@@ -86,32 +85,29 @@ public class QuestionService {
 
     @Transactional
     public QuestionResponse updateQuestion(Long id, QuestionUpdateRequest request) {
-        Optional<Question> question = this.questionRepository.findById(id);
-        if (question.isPresent()) {
-            Question q = question.get();
-            q.updateSubject(request.getSubject());
-            q.updateContent(request.getContent());
-            em.flush();
-            return new QuestionResponse(q);
-        } else {
-            throw new DataNotFoundException("question not found");
-        }
+        Question question = this.questionRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND, UPDATE, QUESTION, NOT_FOUND_QUESTION, id));
+        question.updateSubject(request.getSubject());
+        question.updateContent(request.getContent());
+        em.flush();
+        return new QuestionResponse(question);
     }
 
     @Transactional
     public Integer deleteQuestion(Long id) {
         try {
-            Question q = this.questionRepository.findById(id).orElseThrow(QuestionNotFoundException::new);
-            if (q.getIsDeleted() != null) {
-                throw new QuestionNotFoundException();
+            Question question = this.questionRepository.findById(id)
+                    .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, QUESTION, NOT_FOUND_QUESTION, id));
+            if (question.getIsDeleted() != null) {
+                throw new RestApiException(NOT_FOUND, DELETE, QUESTION, ALREADY_DELETED_QUESTION, id);
             }
-            this.questionRepository.delete(q);
-            List<Answer> answers = q.getAnswerList();
+            this.questionRepository.delete(question);
+            List<Answer> answers = question.getAnswerList();
             for (Answer answer : answers) {
                 answer.updateIsDeleted();
             }
             return 1;
-        } catch (QuestionNotFoundException e) {
+        } catch (Exception e) {
             return 0;
         }
     }
@@ -119,10 +115,10 @@ public class QuestionService {
     @Transactional
     public void checkQuestionPassword(Long id, String password) {
         Question question = this.questionRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("question not found"));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, QUESTION, NOT_FOUND_QUESTION, id));
 
         if (!passwordEncoder.matches(password, question.getPassword())) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid password");
+            throw new RestApiException(UNAUTHORIZED, VALIDATION, QUESTION, INVALID_PASSWORD, id);
         }
     }
 

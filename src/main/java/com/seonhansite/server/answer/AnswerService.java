@@ -1,8 +1,7 @@
 package com.seonhansite.server.answer;
 
 
-import com.seonhansite.server.exception.AnswerNotFoundException;
-import com.seonhansite.server.exception.DataNotFoundException;
+import com.seonhansite.server.exception.RestApiException;
 import com.seonhansite.server.question.Question;
 import com.seonhansite.server.question.QuestionRepository;
 import jakarta.persistence.EntityManager;
@@ -14,7 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+
+import static com.seonhansite.server.type.SeonhanExceptionReasonType.*;
+import static com.seonhansite.server.type.SeonhanMethodType.*;
+import static com.seonhansite.server.type.SeonhanResourceType.ANSWER;
+import static com.seonhansite.server.type.SeonhanResourceType.QUESTION;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
@@ -29,18 +33,15 @@ public class AnswerService {
 
     @Transactional
     public AnswerResponse getAnswer(Long id) {
-        Optional<Answer> answer = this.answerRepository.findById(id);
-        if (answer.isPresent()) {
-            return new AnswerResponse(answer.get());
-        } else {
-            throw new DataNotFoundException("answer not found with id: "+ id);
-        }
+        Answer answer = this.answerRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, ANSWER, NOT_FOUND_ANSWER, id));
+        return new AnswerResponse(answer);
     }
 
     @Transactional
     public AnswerListResponse getList(Long id) {
         Question question = this.questionRepository.findById(id)
-                .orElseThrow(() -> new DataNotFoundException("Question not found with id: " + id));
+                .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, QUESTION, NOT_FOUND_QUESTION, id));
 
         List<AnswerResponse> al = this.answerRepository.findAllByQuestionId(id).stream().map(AnswerResponse::new).sorted(Comparator.comparing(AnswerResponse::getCreatedAt).reversed()).toList();
 
@@ -57,43 +58,39 @@ public class AnswerService {
 
     @Transactional
     public AnswerResponse createAnswer(AnswerCreateRequest answerCreateRequest) {
-        Optional<Question> question = this.questionRepository.findById(answerCreateRequest.getQuestionId());
-        if (question.isPresent()) {
-            Answer answer = Answer.builder()
-                    .author(answerCreateRequest.getAuthor())
-                    .content(answerCreateRequest.getContent())
-                    .question(question.get())
-                    .build();
-            this.answerRepository.save(answer);
-            return new AnswerResponse(answer);
-        } else {
-            throw new DataNotFoundException("question not found");
-        }
+        Long id = answerCreateRequest.getQuestionId();
+        Question question = this.questionRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, QUESTION, NOT_FOUND_QUESTION, id));
+        Answer answer = Answer.builder()
+                .author(answerCreateRequest.getAuthor())
+                .content(answerCreateRequest.getContent())
+                .question(question)
+                .build();
+        this.answerRepository.save(answer);
+        return new AnswerResponse(answer);
     }
 
     @Transactional
     public AnswerResponse updateAnswer(Long id, AnswerUpdateRequest request) {
-        Optional<Answer> answer = this.answerRepository.findById(id);
-        if (answer.isPresent()) {
-            Answer a = answer.get();
-            a.updateContent(request.getContent());
-            em.flush();
-            return new AnswerResponse(a);
-        } else {
-            throw new DataNotFoundException("answer not found");
-        }
+        Answer answer = this.answerRepository.findById(id)
+                .orElseThrow(() -> new RestApiException(NOT_FOUND, UPDATE, ANSWER, NOT_FOUND_ANSWER, id));
+
+        answer.updateContent(request.getContent());
+        em.flush();
+        return new AnswerResponse(answer);
     }
 
     @Transactional
     public Integer deleteAnswer(Long id) {
         try {
-            Answer answer = this.answerRepository.findById(id).orElseThrow(AnswerNotFoundException::new);
+            Answer answer = this.answerRepository.findById(id)
+                    .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, ANSWER, NOT_FOUND_ANSWER, id));
             if (answer.getIsDeleted() != null) {
-                throw new AnswerNotFoundException();
+                throw new RestApiException(NOT_FOUND, DELETE, ANSWER, ALREADY_DELETED_ANSWER, id);
             }
             this.answerRepository.delete(answer);
             return 1;
-        } catch (AnswerNotFoundException e) {
+        } catch (Exception e) {
             return 0;
         }
     }
