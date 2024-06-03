@@ -1,6 +1,6 @@
 package com.seonhansite.server.question;
 
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -9,10 +9,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionUpdateRequest {
-    @NotNull
+    @NotBlank
     private String author;
-    @NotNull
+    @NotBlank
     private String subject;
-    @NotNull
+    @NotBlank
     private String content;
 }

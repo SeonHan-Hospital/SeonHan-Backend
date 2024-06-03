@@ -14,6 +14,7 @@ public class RestApiException extends ResponseStatusException {
     private final SeonhanMethodType methodType;
     private final SeonhanExceptionReasonType reasonType;
     private final Long id;
+    private final String validationMessage;
 
     public RestApiException(HttpStatus status,
                             @NotNull SeonhanMethodType method,
@@ -26,5 +27,26 @@ public class RestApiException extends ResponseStatusException {
         this.methodType = method;
         this.reasonType = reason;
         this.id = id;
+        this.validationMessage = null;
+    }
+
+    public RestApiException(HttpStatus status,
+                            @NotNull SeonhanExceptionReasonType reason,
+                            String message) {
+
+        super(status);
+        this.seonhanResourceType = null;
+        this.methodType = null;
+        this.reasonType = reason;
+        this.id = null;
+        this.validationMessage = message;
+    }
+
+    public String getDetailedMessage() {
+        return this.validationMessage != null ? this.validationMessage : this.reasonType.getMessage();
+    }
+
+    public String getCustomMessage() {
+        return this.reasonType.getMessage();
     }
 }

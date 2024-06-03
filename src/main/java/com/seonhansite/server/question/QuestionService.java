@@ -6,6 +6,7 @@ import com.seonhansite.server.exception.RestApiException;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -28,6 +29,7 @@ import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class QuestionService {
 
     @Autowired
@@ -108,7 +110,8 @@ public class QuestionService {
             }
             return 1;
         } catch (Exception e) {
-            return 0;
+            log.warn(e.getMessage());
+            throw e;
         }
     }
 
@@ -138,5 +141,4 @@ public class QuestionService {
                     content != null && !content.isEmpty() ? criteriaBuilder.like(root.get("content"), "%" + content + "%") : null;
         }
     }
-
 }

@@ -1,5 +1,6 @@
 package com.seonhansite.server.answer;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,8 +12,8 @@ import lombok.NoArgsConstructor;
 public class AnswerCreateRequest {
     @NotNull
     private Long questionId;
-    @NotNull
+    @NotBlank
     private String author;
-    @NotNull
+    @NotBlank
     private String content;
 }

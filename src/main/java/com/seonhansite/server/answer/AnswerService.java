@@ -7,6 +7,7 @@ import com.seonhansite.server.question.QuestionRepository;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +23,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class AnswerService {
 
     @Autowired
@@ -91,7 +93,8 @@ public class AnswerService {
             this.answerRepository.delete(answer);
             return 1;
         } catch (Exception e) {
-            return 0;
+            log.warn(e.getMessage());
+            throw e;
         }
     }
 }

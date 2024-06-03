@@ -1,5 +1,6 @@
 package com.seonhansite.server.question;
 
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,12 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class QuestionCreateRequest {
-    @NotNull
+    @NotBlank
     private String author;
-    @NotNull
+    @NotBlank
     private String password;
-    @NotNull
+    @NotBlank
     private String subject;
-    @NotNull
+    @NotBlank
     private String content;
 }
