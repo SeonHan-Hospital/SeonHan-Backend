@@ -12,7 +12,6 @@ import java.util.List;
 public class QuestionResponse {
     private Long id;
     private String author;
-    private String password;
     private String subject;
     private String content;
     private List<Long> answerId = new ArrayList<>();
@@ -23,7 +22,6 @@ public class QuestionResponse {
     public QuestionResponse(Question question) {
         this.id = question.getId();
         this.author = question.getAuthor();
-        this.password = question.getPassword();
         this.subject = question.getSubject();
         this.content = question.getContent();
         this.answerId = question.getAnswerList().stream()
