@@ -76,8 +76,8 @@ public class QuestionService {
     @Transactional
     public QuestionResponse createQuestion(QuestionCreateRequest request) {
         Question q = Question.builder()
-                .author(request.getAuthor())
-                .password(passwordEncoder.encode(request.getPassword()))
+                .author(request.getAuthor().trim())
+                .password(passwordEncoder.encode(request.getPassword().trim()))
                 .subject(request.getSubject())
                 .content(request.getContent())
                 .build();

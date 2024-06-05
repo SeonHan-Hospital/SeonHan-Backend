@@ -64,7 +64,7 @@ public class AnswerService {
         Question question = this.questionRepository.findById(id)
                 .orElseThrow(() -> new RestApiException(NOT_FOUND, READ, QUESTION, NOT_FOUND_QUESTION, id));
         Answer answer = Answer.builder()
-                .author(answerCreateRequest.getAuthor())
+                .author(answerCreateRequest.getAuthor().trim())
                 .content(answerCreateRequest.getContent())
                 .question(question)
                 .build();
