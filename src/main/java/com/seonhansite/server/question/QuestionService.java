@@ -8,17 +8,12 @@ import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static com.seonhansite.server.type.SeonhanExceptionReasonType.*;
 import static com.seonhansite.server.type.SeonhanMethodType.*;
@@ -43,24 +38,18 @@ public class QuestionService {
 
     @Transactional
     public QuestionListResponse getList(String author, String subject, String content, Integer page, Integer limit) {
-        List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("createdAt"));
-        Pageable pageable = PageRequest.of(page, limit, Sort.by(sorts));
+        int offset = page * limit;
 
-        Specification<Question> spec = Specification.where(
-                QuestionSpecifications.hasAuthor(author)
-                        .and(QuestionSpecifications.hasSubject(subject))
-                        .and(QuestionSpecifications.hasContent(content))
-        );
+        List<QuestionResponse> pq = this.questionRepository.findAllByCustom(author, subject, content, limit, offset).stream()
+                .map(QuestionResponse::new)
+                .collect(Collectors.toList());
 
-        Page<QuestionResponse> pq = this.questionRepository.findAll(spec, pageable).map(QuestionResponse::new);
-
-        Integer count = Math.toIntExact(pq.getTotalElements());
-
+        Integer totalElements = questionRepository.countByCustom(author, subject, content);
 
         QuestionListResponse response = new QuestionListResponse();
-        response.setRows(pq.getContent());
-        response.setCount(count);
+
+        response.setRows(pq);
+        response.setCount(totalElements);
         response.setPage(page);
         response.setMessage("QnA 목록을 받아왔습니다.");
         return response;
@@ -122,23 +111,6 @@ public class QuestionService {
 
         if (!passwordEncoder.matches(password, question.getPassword())) {
             throw new RestApiException(UNAUTHORIZED, VALIDATION, QUESTION, INVALID_PASSWORD, id);
-        }
-    }
-
-    private static class QuestionSpecifications {
-        public static Specification<Question> hasAuthor(String author) {
-            return (root, query, criteriaBuilder) ->
-                    author != null && !author.isEmpty() ? criteriaBuilder.like(root.get("author"), "%" + author + "%") : null;
-        }
-
-        public static Specification<Question> hasSubject(String subject) {
-            return (root, query, criteriaBuilder) ->
-                    subject != null && !subject.isEmpty() ? criteriaBuilder.like(root.get("subject"), "%" + subject + "%") : null;
-        }
-
-        public static Specification<Question> hasContent(String content) {
-            return (root, query, criteriaBuilder) ->
-                    content != null && !content.isEmpty() ? criteriaBuilder.like(root.get("content"), "%" + content + "%") : null;
         }
     }
 }
